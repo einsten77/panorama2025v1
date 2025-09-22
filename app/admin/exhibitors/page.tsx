@@ -83,7 +83,7 @@ export default async function AdminExhibitorsPage() {
             <CardContent>
               <div className="text-3xl font-bold text-green-600">
                 {/* MEJORA: Se usa el tipo 'Exhibitor' en lugar de 'any' */}
-                {exhibitors?.filter((e: any) => e.is_active).length || 0}
+                {exhibitors?.filter((e: Exhibitor) => e.is_active).length || 0}
               </div>
             </CardContent>
           </Card>

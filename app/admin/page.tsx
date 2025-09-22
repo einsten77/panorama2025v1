@@ -140,7 +140,7 @@ export default async function AdminDashboard() {
               </div>
               <div className="flex justify-between items-center">
                 <span>Expositores Activos</span>
-                <Badge variant="outline">{exhibitors?.filter((e) => e.is_active).length || 0}</Badge>
+                <Badge variant="outline">{exhibitors?.filter((e: any) => e.is_active).length || 0}</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span>QR Codes Generados</span>
