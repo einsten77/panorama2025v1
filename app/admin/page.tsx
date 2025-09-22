@@ -148,7 +148,7 @@ export default async function AdminDashboard() {
               </div>
               <div className="flex justify-between items-center">
                 <span>QR Codes Usados</span>
-                <Badge variant="outline">{qrCodes?.filter((qr) => qr.is_used).length || 0}</Badge>
+                <Badge variant="outline">{qrCodes?.filter((qr: any) => qr.is_used).length || 0}</Badge>
               </div>
             </CardContent>
           </Card>
