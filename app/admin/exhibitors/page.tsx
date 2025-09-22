@@ -85,8 +85,7 @@ export default async function AdminExhibitorsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">
-                {exhibitors?.reduce((total: number, e: any) => total + (e.leads?.length || 0), 0) || 0}}
-              </div>
+                {exhibitors?.reduce((total: number, e: any) => total + (e.leads?.length || 0), 0) || 0}
             </CardContent>
           </Card>
         </div>
