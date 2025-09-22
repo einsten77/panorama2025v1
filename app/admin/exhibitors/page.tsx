@@ -74,7 +74,7 @@ export default async function AdminExhibitorsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">
-                {exhibitors?.filter((e) => e.is_active).length || 0}
+                {exhibitors?.filter((e: any) => e.is_active).length || 0}
               </div>
             </CardContent>
           </Card>
