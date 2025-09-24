@@ -76,10 +76,18 @@ export default function LoginPage() {
                     {isLoading ? "Ingresando..." : "Ingresar"}
                   </Button>
                 </div>
-                <div className="mt-4 text-center text-sm">
-                  <Link href="/" className="underline underline-offset-4">
-                    Volver al inicio
-                  </Link>
+                <div className="mt-4 text-center text-sm space-y-2">
+                  <div>
+                    ¿No tienes cuenta?{" "}
+                    <Link href="/auth/register" className="underline underline-offset-4 text-blue-600">
+                      Regístrate aquí
+                    </Link>
+                  </div>
+                  <div>
+                    <Link href="/" className="underline underline-offset-4">
+                      Volver al inicio
+                    </Link>
+                  </div>
                 </div>
               </form>
             </CardContent>
