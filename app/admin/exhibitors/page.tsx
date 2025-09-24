@@ -3,20 +3,14 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ExhibitorManagement } from "@/components/exhibitor-management"
-import { Building, ArrowLeft, Plus } from "lucide-react"
+import { Building, ArrowLeft, Plus, Upload, Download } from "lucide-react"
 import Link from "next/link"
-
-// BUENA PRÁCTICA: Definir un tipo para los datos mejora la seguridad y autocompletado.
-type Exhibitor = {
-  is_active: boolean;
-  leads: { id: number }[] | null;
-  // Añade aquí otras propiedades de tus expositores si las necesitas
-};
+import { HeaderWithNotifications } from "@/components/header-with-notifications"
 
 export default async function AdminExhibitorsPage() {
   const supabase = await createClient()
 
-  // Comprueba si el usuario está autenticado y es administrador
+  // Check if user is authenticated and is admin
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -25,45 +19,56 @@ export default async function AdminExhibitorsPage() {
     redirect("/auth/login")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("user_type").eq("id", user.id).single()
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
 
   if (!profile || profile.user_type !== "admin") {
     redirect("/")
   }
 
-  // Obtiene los expositores con el conteo de leads
+  // Fetch exhibitors with lead counts
   const { data: exhibitors } = await supabase
     .from("exhibitors")
-    .select(
-      `
+    .select(`
       *,
       profiles(full_name, email),
       leads(id)
-    `
-    )
-    .order("created_at", { ascending: false }); // CORRECCIÓN: Se añadió el punto y coma aquí.
+    `)
+    .order("created_at", { ascending: false })
 
-  return ( // CORRECCIÓN: Se aseguró que el paréntesis esté en su lugar.
+  return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <HeaderWithNotifications title="Gestión de Expositores" />
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <Link href="/admin" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Volver al Panel
             </Link>
             <h1 className="text-4xl font-bold text-blue-600 mb-2">Gestión de Expositores</h1>
-            <p className="text-xl text-gray-600">Administrar empresas participantes</p>
+            <p className="text-xl text-gray-600">Administrar empresas participantes del evento</p>
           </div>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Expositor
-          </Button>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline">
+              <Upload className="w-4 h-4 mr-2" />
+              Importar CSV
+            </Button>
+            <Button variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar Expositor
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -73,6 +78,7 @@ export default async function AdminExhibitorsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{exhibitors?.length || 0}</div>
+              <p className="text-sm text-muted-foreground mt-1">Empresas registradas</p>
             </CardContent>
           </Card>
 
@@ -82,21 +88,42 @@ export default async function AdminExhibitorsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">
-                {/* MEJORA: Se usa el tipo 'Exhibitor' en lugar de 'any' */}
-                {exhibitors?.filter((e: Exhibitor) => e.is_active).length || 0}
+                {exhibitors?.filter((e) => e.is_active).length || 0}
               </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {exhibitors?.length
+                  ? Math.round(((exhibitors?.filter((e) => e.is_active).length || 0) / exhibitors.length) * 100)
+                  : 0}
+                % del total
+              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Total Leads Generados</CardTitle>
+              <CardTitle>Total Leads</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">
-                {/* MEJORA: Se usa el tipo 'Exhibitor' en lugar de 'any' */}
-                {exhibitors?.reduce((total: number, e: Exhibitor) => total + (e.leads?.length || 0), 0) || 0}
+                {exhibitors?.reduce((total, e) => total + (e.leads?.length || 0), 0) || 0}
               </div>
+              <p className="text-sm text-muted-foreground mt-1">Contactos generados</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Promedio Leads</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-600">
+                {exhibitors?.length
+                  ? Math.round(
+                      (exhibitors?.reduce((total, e) => total + (e.leads?.length || 0), 0) || 0) / exhibitors.length,
+                    )
+                  : 0}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">Por expositor</p>
             </CardContent>
           </Card>
         </div>
@@ -108,11 +135,10 @@ export default async function AdminExhibitorsPage() {
             <CardDescription>Gestiona la información y estado de las empresas participantes</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* CORRECCIÓN: Aseguramos que 'exhibitors' no sea nulo al pasarlo */}
             <ExhibitorManagement exhibitors={exhibitors || []} />
           </CardContent>
         </Card>
       </div>
     </div>
-  );
+  )
 }

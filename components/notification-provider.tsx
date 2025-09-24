@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+
 import { createContext, useContext, useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
@@ -48,9 +49,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           schema: "public",
           table: "leads",
         },
-        async (payload: any) => {   // ✅ agregado tipado any
+        async (payload) => {
           console.log("[v0] New lead received:", payload)
 
+          // Get exhibitor info for the notification
           const { data: exhibitor } = await supabase
             .from("exhibitors")
             .select("company_name, user_id, advisor_name, advisor_email")
@@ -82,12 +84,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             setNotifications((prev) => [newNotification, ...prev])
             setUnreadCount((prev) => prev + 1)
 
+            // Show toast notification
             toast({
               title: newNotification.title,
               description: newNotification.message,
               duration: 5000,
             })
 
+            // Send email notification to advisor if it's a meeting request
             if (payload.new.lead_type === "meeting" && exhibitor.advisor_email) {
               try {
                 await fetch("/api/notifications/email", {
@@ -125,7 +129,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           schema: "public",
           table: "qr_codes",
         },
-        (payload: any) => {   // ✅ agregado tipado any
+        (payload) => {
           if (payload.new.is_used && !payload.old.is_used) {
             console.log("[v0] QR code used:", payload)
 

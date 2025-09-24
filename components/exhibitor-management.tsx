@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -65,8 +65,7 @@ export function ExhibitorManagement({ exhibitors }: ExhibitorManagementProps) {
     setFilteredExhibitors(filtered)
   }
 
-  // 👇 aquí estaba el error: useState → useEffect
-  useEffect(() => {
+  useState(() => {
     applySearch()
   }, [searchTerm, exhibitors])
 

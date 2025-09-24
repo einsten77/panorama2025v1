@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -69,8 +69,8 @@ export function LeadsTable({ leads, userType }: LeadsTableProps) {
     setFilteredLeads(filtered)
   }
 
-  // ✅ Corrección: usar useEffect, no useState
-  useEffect(() => {
+  // Apply filters when search term or filters change
+  useState(() => {
     applyFilters()
   }, [searchTerm, statusFilter, typeFilter, leads])
 
