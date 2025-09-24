@@ -5,6 +5,8 @@ create table if not exists public.profiles (
   full_name text,
   phone text,
   user_type text check (user_type in ('exhibitor', 'visitor', 'admin')) default 'visitor',
+  -- Adding role field for admin permissions
+  role text check (role in ('user', 'admin')) default 'user',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -36,5 +38,15 @@ create policy "profiles_admin_select_all"
     exists (
       select 1 from public.profiles
       where id = auth.uid() and user_type = 'admin'
+    )
+  );
+
+-- Adding admin management policies
+create policy "profiles_admin_manage_all"
+  on public.profiles for all
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
     )
   );
